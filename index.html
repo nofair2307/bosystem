@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Polaris Signal | 星と君ぷろじぇくと</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Sora:wght@500;700&display=swap">
+<style>
+:root{--bg:#090d22;--bg2:#10163a;--pn:rgba(255,255,255,.045);--bd:rgba(255,255,255,.09);--tx:#eceffd;--mu:#8e96bd;--up:#4fe3b5;--dn:#ff6b8f;--gd:#f6dc9a;--vi:#8f86ff}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg)}
+body{min-height:100vh;color:var(--tx);font:15px/1.6 "Zen Kaku Gothic New",system-ui,sans-serif;background:radial-gradient(900px 500px at 85% -10%,#2a2f78 0,transparent 60%),radial-gradient(700px 500px at -10% 110%,#1d2a5e 0,transparent 55%),var(--bg);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 18px 40px}
+header{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:18px}
+h1{font:700 22px/1 Sora,sans-serif;letter-spacing:.02em}
+h1 small{display:block;font:400 12px "Zen Kaku Gothic New";color:var(--mu);margin-top:6px;letter-spacing:0}
+.ctl{display:flex;flex-wrap:wrap;gap:8px}
+select,input,button{font:inherit;color:var(--tx);background:rgba(255,255,255,.07);border:1px solid var(--bd);border-radius:10px;padding:8px 11px;outline:none}
+select option{color:#111}
+input{width:96px}
+input[type=range]{width:120px;padding:0;accent-color:var(--gd)}
+button{cursor:pointer;font-weight:700;transition:background .15s,transform .1s}
+button:hover{background:rgba(255,255,255,.13)}
+button:active{transform:scale(.97)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+button.go{background:var(--gd);color:#20180a;border-color:transparent}
+button.go:hover{background:#ffe9b3}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:390px 1fr}}
+.pn{background:var(--pn);border:1px solid var(--bd);border-radius:18px;padding:18px;backdrop-filter:blur(8px)}
+.pn h2{font-size:13px;font-weight:700;color:var(--mu);margin-bottom:12px}
+.orbwrap{display:grid;place-items:center;padding:6px 0 14px}
+.orb{--p:0;--c:var(--vi);position:relative;width:260px;height:260px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(255,255,255,.07) 0)}
+.orb::before{content:"";position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#1c2358,#0b1030 70%);box-shadow:inset 0 0 40px rgba(143,134,255,.15)}
+.orb.up{--c:var(--up);box-shadow:0 0 60px rgba(79,227,181,.25)}
+.orb.dn{--c:var(--dn);box-shadow:0 0 60px rgba(255,107,143,.25)}
+.orb>div{position:relative;text-align:center}
+.dir{font:700 44px/1 Sora,sans-serif;letter-spacing:.02em}
+.up .dir{color:var(--up)}.dn .dir{color:var(--dn)}
+.sub{color:var(--mu);margin-top:8px;font-size:13px}
+.big{font:700 26px/1.1 Sora,sans-serif;margin-top:6px;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mu);padding:7px 0;border-top:1px solid var(--bd)}
+.row b{color:var(--tx);font-variant-numeric:tabular-nums}
+.warn{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,107,143,.12);border:1px solid rgba(255,107,143,.4);font-size:13px}
+.warn.on{display:block}
+canvas{width:100%;height:300px;display:block}
+.ind{display:grid;gap:9px}
+.ib{display:grid;grid-template-columns:92px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.bar{position:relative;height:8px;border-radius:6px;background:rgba(255,255,255,.07)}
+.bar i{position:absolute;top:0;bottom:0;border-radius:6px}
+.bar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:rgba(255,255,255,.25)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.stats b{display:block;font:700 22px Sora,sans-serif;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--mu)}
+.hist{max-height:260px;overflow:auto}
+.hist table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.hist td,.hist th{padding:7px 6px;border-top:1px solid var(--bd);text-align:left;font-weight:400}
+.hist th{color:var(--mu);position:sticky;top:0;background:#12183e}
+.w{color:var(--up)}.l{color:var(--dn)}.d{color:var(--mu)}
+.two{display:grid;gap:16px;margin-top:16px}
+@media(min-width:900px){.two{grid-template-columns:1fr 1fr}}
+.note{margin-top:18px;color:var(--mu);font-size:12px;line-height:1.7}
+footer{margin-top:26px;text-align:center;color:var(--mu);font-size:12px;line-height:1.9}
+footer b{color:var(--gd);font-weight:700}
+.flash{animation:fl .9s ease-out}
+@keyframes fl{0%{filter:brightness(2)}100%{filter:none}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}}
+.lbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mu)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Polaris Signal<small>5分先を読む、裁量トレーダーのための通知機</small></h1>
+<div class="ctl">
+<select id="src"><option value="bn">暗号資産 (Binance)</option><option value="td">FX (Twelve Data)</option></select>
+<select id="sym"></select>
+<input id="key" type="password" placeholder="APIキー" style="display:none">
+<button id="go" class="go">開始</button>
+<button id="snd">🔔 音ON</button>
+<button id="tst">試聴</button>
+</div>
+</header>
+
+<div class="grid">
+<section class="pn">
+<div class="orbwrap"><div class="orb" id="orb"><div><div class="dir" id="dir">WAIT</div><div class="sub" id="sub">開始を押してください</div><div class="big" id="cd">--:--</div></div></div></div>
+<div class="row"><span>現在価格</span><b id="px">-</b></div>
+<div class="row"><span>次のローソク確定まで</span><b id="nx">-</b></div>
+<div class="row"><span>エントリー価格</span><b id="en">-</b></div>
+<div class="row"><span>シグナル強度</span><b id="st">-</b></div>
+<div class="warn" id="lock">連敗上限に達したためシグナルを停止中です。一度休憩してください。<br><button id="unl" style="margin-top:8px">停止を解除</button></div>
+</section>
+
+<section class="pn">
+<h2>1分足 / EMA9・EMA21 / シグナル位置</h2>
+<canvas id="cv"></canvas>
+</section>
+</div>
+
+<div class="two">
+<section class="pn">
+<h2>判定の内訳(右が買い寄り、左が売り寄り)</h2>
+<div class="ind" id="ind"></div>
+</section>
+<section class="pn">
+<h2>成績(5分後に自動判定)</h2>
+<div class="stats"><div><b id="sw" class="w">0</b><span>勝ち</span></div><div><b id="sl" class="l">0</b><span>負け</span></div><div><b id="sr">-</b><span>勝率</span></div><div><b id="sb">-</b><span>必要勝率</span></div></div>
+<div class="ctl" style="margin-top:14px">
+<label class="lbl">感度<input id="th" type="range" min="35" max="85" value="55"><span id="thv">0.55</span></label>
+<label class="lbl">ペイアウト<input id="po" type="number" step="0.01" value="1.85" style="width:74px"></label>
+<label class="lbl">連敗上限<input id="ml" type="number" min="1" max="20" value="3" style="width:60px"></label>
+<button id="clr">履歴を消去</button>
+</div>
+</section>
+</div>
+
+<section class="pn" style="margin-top:16px">
+<h2>シグナル履歴</h2>
+<div class="hist"><table><thead><tr><th>時刻</th><th>銘柄</th><th>方向</th><th>エントリー</th><th>結果価格</th><th>結果</th></tr></thead><tbody id="hb"></tbody></table></div>
+</section>
+
+<p class="note">本ツールは過去のテクニカル指標を機械的に合成した参考情報であり、勝敗を保証するものではありません。「シグナル強度」は勝率ではなく、指標の同調度合いです。成績欄の勝率が「必要勝率」(1 ÷ ペイアウト)を継続的に上回らない限り、取引を続けるほど資金は減ります。最終判断と資金管理はご自身で行ってください。</p>
+
+<footer>© 星と君ぷろじぇくと<br>Produced by <b>Onoda &amp; Miki</b></footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const SY={bn:["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT"],td:["USD/JPY","EUR/USD","EUR/JPY","GBP/JPY","AUD/JPY"]};
+const HOLD=300000;
+const S={cs:[],live:null,ws:null,tm:null,pend:[],hist:[],locked:false,sound:true,a:null,ac:null,run:false};
+try{S.hist=JSON.parse(localStorage.getItem("pl_h")||"[]")}catch(e){}
+const save=()=>{try{localStorage.setItem("pl_h",JSON.stringify(S.hist.slice(0,300)))}catch(e){}};
+const clip=x=>Math.max(-1,Math.min(1,x));
+const ema=(a,p)=>{const k=2/(p+1);let e=a[0];return a.map((v,i)=>i?e=v*k+e*(1-k):e)};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const rsi=(a,p=14)=>{let g=0,l=0;for(let i=1;i<=p;i++){const d=a[i]-a[i-1];d>0?g+=d:l-=d}g/=p;l/=p;for(let i=p+1;i<a.length;i++){const d=a[i]-a[i-1];g=(g*(p-1)+Math.max(d,0))/p;l=(l*(p-1)+Math.max(-d,0))/p}return l===0?100:100-100/(1+g/l)};
+const fmt=v=>v==null?"-":v>=1000?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(5);
+const tstr=t=>new Date(t).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+
+function analyze(cs){
+  const n=cs.length;if(n<60)return null;
+  const c=cs.map(x=>x.c),p=c[n-1];
+  const tr=cs.map((x,i)=>i?Math.max(x.h-x.l,Math.abs(x.h-c[i-1]),Math.abs(x.l-c[i-1])):x.h-x.l);
+  const atr=mean(tr.slice(-14)),base=mean(tr.slice(-100));
+  const e9=ema(c,9),e21=ema(c,21),e50=ema(c,50),e12=ema(c,12),e26=ema(c,26);
+  const m=e12.map((v,i)=>v-e26[i]),sg=ema(m,9),h0=m[n-2]-sg[n-2],h1=m[n-1]-sg[n-1];
+  const r=rsi(c.slice(-120));
+  const w20=c.slice(-20),mu=mean(w20),sd=Math.sqrt(mean(w20.map(v=>(v-mu)**2)))||1e-9;
+  const b=(p-(mu-2*sd))/(4*sd);
+  const kAt=i=>{const w=cs.slice(i-13,i+1),hi=Math.max(...w.map(x=>x.h)),lo=Math.min(...w.map(x=>x.l));return hi===lo?50:(c[i]-lo)/(hi-lo)*100};
+  const k=kAt(n-1),d=mean([kAt(n-1),kAt(n-2),kAt(n-3)]);
+  const parts=[
+    {n:"トレンド",w:1.2,v:(Math.sign(e9[n-1]-e21[n-1])+Math.sign(e21[n-1]-e50[n-1]))/2},
+    {n:"MACD",w:1,v:(Math.sign(h1)+Math.sign(h1-h0))/2},
+    {n:"RSI",w:.8,v:r<30?1:r>70?-1:clip((r-50)/-50*-1.2)},
+    {n:"ボリバン",w:1,v:b<.05?1:b>.95?-1:clip((.5-b)*.8)},
+    {n:"ストキャス",w:.8,v:k<20&&k>d?1:k>80&&k<d?-1:0},
+    {n:"上位足傾き",w:1,v:clip((e50[n-1]-e50[n-6])/atr)},
+    {n:"短期勢い",w:.6,v:clip((c[n-1]-c[n-4])/(atr*2))}
+  ];
+  const sw=parts.reduce((s,x)=>s+x.w,0),score=parts.reduce((s,x)=>s+x.w*x.v,0)/sw;
+  const agree=parts.filter(x=>Math.abs(x.v)>.3&&Math.sign(x.v)===Math.sign(score)).length;
+  return{score,parts,agree,price:p,volOk:atr/base>=.6,e9,e21,atr};
+}
+
+function beep(dir){
+  if(!S.sound)return;
+  try{
+    S.ac=S.ac||new(window.AudioContext||window.webkitAudioContext)();
+    if(S.ac.state==="suspended")S.ac.resume();
+    const f=dir>0?[660,880,1175]:[880,660,440];
+    f.forEach((hz,i)=>{
+      const o=S.ac.createOscillator(),g=S.ac.createGain(),t=S.ac.currentTime+i*.17;
+      o.type="triangle";o.frequency.value=hz;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+      o.connect(g).connect(S.ac.destination);o.start(t);o.stop(t+.32);
+    });
+  }catch(e){}
+}
+
+function settle(){
+  const last=S.cs[S.cs.length-1];if(!last)return;
+  const closeT=last.t+60000;
+  S.pend=S.pend.filter(q=>{
+    if(closeT<q.exp)return true;
+    const diff=(last.c-q.entry)*q.dir;
+    q.res=diff>0?"W":diff<0?"L":"D";q.out=last.c;
+    return false;
+  });
+  const lim=+$("#ml").value||3;
+  let streak=0;
+  for(const x of S.hist){if(x.res==="L")streak++;else if(x.res==="W")break;}
+  if(streak>=lim)S.locked=true;
+  save();
+}
+
+function onClose(){
+  S.a=analyze(S.cs);
+  settle();
+  const a=S.a;
+  if(a&&!S.locked&&!S.pend.length&&S.run){
+    const th=+$("#th").value/100;
+    if(a.volOk&&Math.abs(a.score)>=th&&a.agree>=4){
+      const last=S.cs[S.cs.length-1],dir=Math.sign(a.score);
+      const q={t:last.t+60000,sym:$("#sym").value,dir,entry:last.c,exp:last.t+60000+HOLD,score:a.score,res:null};
+      S.pend.push(q);S.hist.unshift(q);save();
+      beep(dir);
+      $("#orb").classList.remove("flash");void $("#orb").offsetWidth;$("#orb").classList.add("flash");
+      if(navigator.vibrate)navigator.vibrate(dir>0?[120]:[120,80,120]);
+    }
+  }
+  render();
+}
+
+function render(){
+  const a=S.a,live=S.live||S.cs[S.cs.length-1];
+  $("#px").textContent=live?fmt(live.c):"-";
+  const act=S.hist.find(x=>x.res===null&&S.pend.includes(x));
+  const orb=$("#orb");
+  orb.className="orb"+(act?(act.dir>0?" up":" dn"):"");
+  if(act){
+    $("#dir").textContent=act.dir>0?"HIGH ▲":"LOW ▼";
+    $("#sub").textContent="判定まで";
+    $("#en").textContent=fmt(act.entry);
+  }else{
+    $("#dir").textContent=S.locked?"STOP":"WAIT";
+    $("#sub").textContent=S.locked?"連敗上限で停止中":S.run?(a?"条件が揃うのを待っています":"データ蓄積中…"):"開始を押してください";
+    $("#cd").textContent="--:--";orb.style.setProperty("--p",0);
+    $("#en").textContent="-";
+  }
+  $("#st").textContent=a?Math.round(Math.abs(a.score)*100)+" / 100  ("+(a.score>0?"買い寄り":a.score<0?"売り寄り":"中立")+")":"-";
+  $("#lock").classList.toggle("on",S.locked);
+  $("#ind").innerHTML=a?a.parts.map(x=>{
+    const w=Math.abs(x.v)*50,l=x.v>=0?50:50-w;
+    return`<div class="ib"><span>${x.n}</span><div class="bar"><i style="left:${l}%;width:${w}%;background:${x.v>=0?"var(--up)":"var(--dn)"}"></i></div><b style="text-align:right">${x.v>=0?"+":""}${x.v.toFixed(2)}</b></div>`;
+  }).join(""):'<span style="color:var(--mu)">データ待ちです</span>';
+  const dn=S.hist.filter(x=>x.res);const W=dn.filter(x=>x.res==="W").length,L=dn.filter(x=>x.res==="L").length;
+  $("#sw").textContent=W;$("#sl").textContent=L;
+  $("#sr").textContent=W+L?(W/(W+L)*100).toFixed(1)+"%":"-";
+  const po=+$("#po").value;$("#sb").textContent=po>1?(100/po).toFixed(1)+"%":"-";
+  $("#hb").innerHTML=S.hist.slice(0,50).map(x=>`<tr><td>${tstr(x.t)}</td><td>${x.sym}</td><td class="${x.dir>0?"w":"l"}">${x.dir>0?"HIGH":"LOW"}</td><td>${fmt(x.entry)}</td><td>${fmt(x.out)}</td><td class="${x.res==="W"?"w":x.res==="L"?"l":"d"}">${x.res==="W"?"勝ち":x.res==="L"?"負け":x.res==="D"?"引分":"判定中"}</td></tr>`).join("");
+  draw();
+}
+
+function draw(){
+  const cv=$("#cv"),dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;
+  cv.width=W*dpr;cv.height=H*dpr;
+  const g=cv.getContext("2d");g.scale(dpr,dpr);g.clearRect(0,0,W,H);
+  const N=70,all=S.live?S.cs.concat([S.live]):S.cs,v=all.slice(-N);
+  if(v.length<5)return;
+  const a=S.a,off=all.length-v.length;
+  const hi=Math.max(...v.map(x=>x.h)),lo=Math.min(...v.map(x=>x.l)),pad=(hi-lo)*.08||1;
+  const Y=p=>H-16-(p-(lo-pad))/((hi+pad)-(lo-pad))*(H-32),bw=W/N;
+  g.strokeStyle="rgba(255,255,255,.06)";g.lineWidth=1;
+  for(let i=1;i<5;i++){g.beginPath();g.moveTo(0,H/5*i);g.lineTo(W,H/5*i);g.stroke()}
+  v.forEach((x,i)=>{
+    const cx=i*bw+bw/2,up=x.c>=x.o;g.strokeStyle=g.fillStyle=up?"#4fe3b5":"#ff6b8f";
+    g.beginPath();g.moveTo(cx,Y(x.h));g.lineTo(cx,Y(x.l));g.stroke();
+    g.fillRect(cx-bw*.33,Math.min(Y(x.o),Y(x.c)),bw*.66,Math.max(1.5,Math.abs(Y(x.o)-Y(x.c))));
+  });
+  if(a){
+    [[a.e9,"#f6dc9a"],[a.e21,"#8f86ff"]].forEach(([e,col])=>{
+      g.strokeStyle=col;g.lineWidth=1.6;g.beginPath();
+      v.forEach((x,i)=>{const idx=off+i;if(idx>=e.length)return;const px=i*bw+bw/2;i?g.lineTo(px,Y(e[idx])):g.moveTo(px,Y(e[idx]))});
+      g.stroke();
+    });
+  }
+  S.hist.forEach(q=>{
+    if(q.sym!==$("#sym").value)return;
+    const i=v.findIndex(x=>x.t+60000===q.t);if(i<0)return;
+    const cx=i*bw+bw/2,y=q.dir>0?H-8:10;
+    g.fillStyle=q.dir>0?"#4fe3b5":"#ff6b8f";g.beginPath();
+    q.dir>0?(g.moveTo(cx,y-8),g.lineTo(cx-6,y+2),g.lineTo(cx+6,y+2)):(g.moveTo(cx,y+8),g.lineTo(cx-6,y-2),g.lineTo(cx+6,y-2));
+    g.fill();
+  });
+}
+
+function tick(){
+  const now=Date.now(),nx=60-(now%60000)/1000;
+  $("#nx").textContent=S.run?nx.toFixed(0)+" 秒":"-";
+  const q=S.pend[0];
+  if(q){
+    const rem=Math.max(0,q.exp-now);
+    const m=Math.floor(rem/60000),s=Math.floor(rem%60000/1000);
+    $("#cd").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    $("#orb").style.setProperty("--p",(rem/HOLD*100).toFixed(1));
+  }
+}
+
+function stop(){
+  S.run=false;
+  if(S.ws){S.ws.onclose=null;S.ws.close();S.ws=null}
+  clearInterval(S.tm);S.tm=null;
+}
+
+async function startBn(sym){
+  const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=1m&limit=300`);
+  const j=await r.json();
+  const l=j.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4]}));
+  S.live=l.pop();S.cs=l;S.a=analyze(S.cs);render();
+  const open=()=>{
+    const ws=new WebSocket(`wss://stream.binance.com:9443/ws/${sym.toLowerCase()}@kline_1m`);
+    ws.onmessage=e=>{
+      const k=JSON.parse(e.data).k,c={t:k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c};
+      if(k.x){
+        if(!S.cs.length||S.cs[S.cs.length-1].t<c.t){S.cs.push(c);S.cs=S.cs.slice(-400);S.live=null;onClose()}
+      }else{S.live=c;$("#px").textContent=fmt(c.c);draw()}
+    };
+    ws.onclose=()=>{if(S.run)setTimeout(open,2000)};
+    S.ws=ws;
+  };
+  open();
+}
+
+async function pollTd(sym,key){
+  const go=async()=>{
+    try{
+      const r=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1min&outputsize=300&apikey=${encodeURIComponent(key)}`);
+      const j=await r.json();
+      if(j.status==="error"){$("#sub").textContent=j.message.slice(0,40);return}
+      const l=j.values.slice().reverse().map(x=>({t:Date.parse(x.datetime.replace(" ","T")+"Z"),o:+x.open,h:+x.high,l:+x.low,c:+x.close}));
+      const live=l.pop(),prev=S.cs.length?S.cs[S.cs.length-1].t:0;
+      S.live=live;
+      const fresh=l.length&&l[l.length-1].t>prev;
+      S.cs=l;
+      if(fresh)onClose();else{S.a=S.a||analyze(S.cs);render()}
+    }catch(e){$("#sub").textContent="通信に失敗しました"}
+  };
+  await go();S.tm=setInterval(go,10000);
+}
+
+async function start(){
+  stop();S.cs=[];S.live=null;S.pend=[];S.a=null;S.locked=false;
+  S.hist.forEach(x=>{if(x.res===null)x.res="D"});
+  S.run=true;$("#go").textContent="停止";
+  try{
+    S.ac=S.ac||new(window.AudioContext||window.webkitAudioContext)();S.ac.resume();
+  }catch(e){}
+  const sym=$("#sym").value;
+  try{
+    if($("#src").value==="bn")await startBn(sym);
+    else{
+      if(!$("#key").value){$("#sub").textContent="Twelve DataのAPIキーを入力してください";S.run=false;$("#go").textContent="開始";return}
+      await pollTd(sym,$("#key").value);
+    }
+  }catch(e){$("#sub").textContent="データ取得に失敗しました";S.run=false;$("#go").textContent="開始"}
+  render();
+}
+
+function fillSym(){
+  $("#sym").innerHTML=SY[$("#src").value].map(s=>`<option>${s}</option>`).join("");
+  $("#key").style.display=$("#src").value==="td"?"":"none";
+}
+$("#src").onchange=()=>{fillSym();if(S.run)start()};
+$("#sym").onchange=()=>{if(S.run)start()};
+$("#go").onclick=()=>{if(S.run){stop();$("#go").textContent="開始";render()}else start()};
+$("#snd").onclick=()=>{S.sound=!S.sound;$("#snd").textContent=S.sound?"🔔 音ON":"🔕 音OFF"};
+$("#tst").onclick=()=>{const was=S.sound;S.sound=true;beep(1);setTimeout(()=>beep(-1),700);S.sound=was};
+$("#unl").onclick=()=>{S.locked=false;render()};
+$("#clr").onclick=()=>{S.hist=[];S.pend=[];save();render()};
+$("#th").oninput=()=>{$("#thv").textContent=($("#th").value/100).toFixed(2)};
+$("#po").oninput=render;
+window.addEventListener("resize",draw);
+fillSym();render();setInterval(tick,500);
+</script>
+</body>
+</html>
