@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Polaris Signal | 星と君ぷろじぇくと</title>
+<title>Miki BO System | 星と君ぷろじぇくと</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Sora:wght@500;700&display=swap">
 <style>
 :root{--bg:#090d22;--bg2:#10163a;--pn:rgba(255,255,255,.045);--bd:rgba(255,255,255,.09);--tx:#eceffd;--mu:#8e96bd;--up:#4fe3b5;--dn:#ff6b8f;--gd:#f6dc9a;--vi:#8f86ff}
@@ -65,13 +65,19 @@ footer b{color:var(--gd);font-weight:700}
 .flash{animation:fl .9s ease-out}
 @keyframes fl{0%{filter:brightness(2)}100%{filter:none}}
 @media(prefers-reduced-motion:reduce){.flash{animation:none}}
+.pm{display:flex;justify-content:space-between;font:700 20px Sora,sans-serif;font-variant-numeric:tabular-nums}
+.pb{position:relative;height:14px;border-radius:8px;margin:8px 0 4px;background:var(--dn);overflow:hidden}
+.pb i{position:absolute;right:0;top:0;bottom:0;width:50%;background:var(--up);transition:width .3s}
+.pn{font-size:11px;color:var(--mu);text-align:right;margin-bottom:12px}
+.mbar{position:relative;height:12px;border-radius:8px;margin:4px 0 16px;background:linear-gradient(90deg,var(--dn),rgba(255,255,255,.12) 50%,var(--up))}
+.mbar i{position:absolute;top:-4px;left:50%;width:6px;height:20px;border-radius:4px;background:#fff;transform:translateX(-50%);transition:left .25s}
 .lbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mu)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-<h1>Polaris Signal<small>5分先を読む、裁量トレーダーのための通知機</small></h1>
+<h1>Miki BO System<small>5分先を読む、裁量トレーダーのための通知機</small></h1>
 <div class="ctl">
 <select id="src"><option value="bn">暗号資産 (Binance)</option><option value="td">FX (Twelve Data)</option></select>
 <select id="sym"></select>
@@ -85,6 +91,11 @@ footer b{color:var(--gd);font-weight:700}
 <div class="grid">
 <section class="pn">
 <div class="orbwrap"><div class="orb" id="orb"><div><div class="dir" id="dir">WAIT</div><div class="sub" id="sub">開始を押してください</div><div class="big" id="cd">--:--</div></div></div></div>
+<div class="pm"><span id="pl" class="l">LOW 50%</span><span id="ph" class="w">HIGH 50%</span></div>
+<div class="pb"><i id="pbar"></i></div>
+<div class="pn" id="pn">-</div>
+<div class="row"><span>ライブ判定(確定前)</span><b id="lv">-</b></div>
+<div class="row"><span>MACD予想</span><b id="mx">-</b></div>
 <div class="row"><span>現在価格</span><b id="px">-</b></div>
 <div class="row"><span>次のローソク確定まで</span><b id="nx">-</b></div>
 <div class="row"><span>エントリー価格</span><b id="en">-</b></div>
@@ -106,7 +117,9 @@ footer b{color:var(--gd);font-weight:700}
 <section class="pn">
 <h2>成績(5分後に自動判定)</h2>
 <div class="stats"><div><b id="sw" class="w">0</b><span>勝ち</span></div><div><b id="sl" class="l">0</b><span>負け</span></div><div><b id="sr">-</b><span>勝率</span></div><div><b id="sb">-</b><span>必要勝率</span></div></div>
+<div class="row" style="margin-top:12px"><span>予兆エントリーの成績</span><b id="pr">-</b></div>
 <div class="ctl" style="margin-top:14px">
+<label class="lbl">指標速度<select id="pst"><option value="0">標準</option><option value="1" selected>高速</option><option value="2">超高速</option></select></label>
 <label class="lbl">感度<input id="th" type="range" min="35" max="85" value="55"><span id="thv">0.55</span></label>
 <label class="lbl">ペイアウト<input id="po" type="number" step="0.01" value="1.85" style="width:74px"></label>
 <label class="lbl">連敗上限<input id="ml" type="number" min="1" max="20" value="3" style="width:60px"></label>
@@ -120,7 +133,7 @@ footer b{color:var(--gd);font-weight:700}
 <div class="hist"><table><thead><tr><th>時刻</th><th>銘柄</th><th>方向</th><th>エントリー</th><th>結果価格</th><th>結果</th></tr></thead><tbody id="hb"></tbody></table></div>
 </section>
 
-<p class="note">本ツールは過去のテクニカル指標を機械的に合成した参考情報であり、勝敗を保証するものではありません。「シグナル強度」は勝率ではなく、指標の同調度合いです。成績欄の勝率が「必要勝率」(1 ÷ ペイアウト)を継続的に上回らない限り、取引を続けるほど資金は減ります。最終判断と資金管理はご自身で行ってください。</p>
+<p class="note">ハイ/ローの%は、この銘柄の直近データで「同じ強さの判定が出たあと5分後にどちらへ動いたか」を実測して算出しています(件数が少ない間は50%寄りに補正)。通常は50〜60%前後に収まり、100%に近い値は出ません。「予兆」は確定前のローソク足で計算した早期サインです。確定シグナルより早く入れる代わりに、ダマシが増えます。実際に使えるかは「予兆エントリーの成績」で確認してください。本ツールは過去のテクニカル指標を機械的に合成した参考情報であり、勝敗を保証するものではありません。「シグナル強度」は勝率ではなく、指標の同調度合いです。成績欄の勝率が「必要勝率」(1 ÷ ペイアウト)を継続的に上回らない限り、取引を続けるほど資金は減ります。最終判断と資金管理はご自身で行ってください。</p>
 
 <footer>© 星と君ぷろじぇくと<br>Produced by <b>Onoda &amp; Miki</b></footer>
 </div>
@@ -129,7 +142,7 @@ footer b{color:var(--gd);font-weight:700}
 const $=s=>document.querySelector(s);
 const SY={bn:["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT"],td:["USD/JPY","EUR/USD","EUR/JPY","GBP/JPY","AUD/JPY"]};
 const HOLD=300000;
-const S={cs:[],live:null,ws:null,tm:null,pend:[],hist:[],locked:false,sound:true,a:null,ac:null,run:false};
+const S={cs:[],live:null,ws:null,tm:null,pend:[],hist:[],locked:false,sound:true,a:null,ac:null,run:false,pp:[],cal:[],calT:0,lv:null,lt:0,preT:0,P:{f:8,s:17,g:6,r:10,k:10}};
 try{S.hist=JSON.parse(localStorage.getItem("pl_h")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("pl_h",JSON.stringify(S.hist.slice(0,300)))}catch(e){}};
 const clip=x=>Math.max(-1,Math.min(1,x));
@@ -140,20 +153,44 @@ const fmt=v=>v==null?"-":v>=1000?v.toFixed(2):v>=10?v.toFixed(3):v.toFixed(5);
 const tstr=t=>new Date(t).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
 
 function analyze(cs){
-  const n=cs.length;if(n<60)return null;
+  const n=cs.length;if(n<80)return null;
   const c=cs.map(x=>x.c),p=c[n-1];
   const tr=cs.map((x,i)=>i?Math.max(x.h-x.l,Math.abs(x.h-c[i-1]),Math.abs(x.l-c[i-1])):x.h-x.l);
   const atr=mean(tr.slice(-14)),base=mean(tr.slice(-100));
-  const e9=ema(c,9),e21=ema(c,21),e50=ema(c,50),e12=ema(c,12),e26=ema(c,26);
-  const m=e12.map((v,i)=>v-e26[i]),sg=ema(m,9),h0=m[n-2]-sg[n-2],h1=m[n-1]-sg[n-1];
-  const r=rsi(c.slice(-120));
+  const e9=ema(c,9),e21=ema(c,21),e50=ema(c,50),e12=ema(c,S.P.f),e26=ema(c,S.P.s);
+  const m=e12.map((v,i)=>v-e26[i]),sg=ema(m,S.P.g),h0=m[n-2]-sg[n-2],h1=m[n-1]-sg[n-1];
+  const r=rsi(c.slice(-120),S.P.r);
   const w20=c.slice(-20),mu=mean(w20),sd=Math.sqrt(mean(w20.map(v=>(v-mu)**2)))||1e-9;
   const b=(p-(mu-2*sd))/(4*sd);
-  const kAt=i=>{const w=cs.slice(i-13,i+1),hi=Math.max(...w.map(x=>x.h)),lo=Math.min(...w.map(x=>x.l));return hi===lo?50:(c[i]-lo)/(hi-lo)*100};
+  const kAt=i=>{const w=cs.slice(i-S.P.k+1,i+1),hi=Math.max(...w.map(x=>x.h)),lo=Math.min(...w.map(x=>x.l));return hi===lo?50:(c[i]-lo)/(hi-lo)*100};
   const k=kAt(n-1),d=mean([kAt(n-1),kAt(n-2),kAt(n-3)]);
+  const tp=cs.map(x=>(x.h+x.l+x.c)/3),cw=tp.slice(-14),cm=mean(cw),cd=mean(cw.map(v=>Math.abs(v-cm)))||1e-9,cci=(tp[n-1]-cm)/(.015*cd);
+  let pdm=0,mdm=0,trs=0;
+  for(let i=n-14;i<n;i++){const u=cs[i].h-cs[i-1].h,w=cs[i-1].l-cs[i].l;pdm+=u>w&&u>0?u:0;mdm+=w>u&&w>0?w:0;trs+=tr[i]}
+  const pdi=pdm/trs*100,mdi=mdm/trs*100,dx=Math.abs(pdi-mdi)/((pdi+mdi)||1)*100;
+  const mid=(i,q)=>{const w=cs.slice(i-q+1,i+1);return(Math.max(...w.map(x=>x.h))+Math.min(...w.map(x=>x.l)))/2};
+  const tk=mid(n-1,9),kj=mid(n-1,26),sa=(mid(n-27,9)+mid(n-27,26))/2,sb=mid(n-27,52);
+  let sar=cs[n-79].l,ep=cs[n-79].h,af=.02,su=true;
+  for(let i=n-78;i<n;i++){sar+=af*(ep-sar);if(su){if(cs[i].l<sar){su=false;sar=ep;ep=cs[i].l;af=.02}else if(cs[i].h>ep){ep=cs[i].h;af=Math.min(.2,af+.02)}}else{if(cs[i].h>sar){su=true;sar=ep;ep=cs[i].h;af=.02}else if(cs[i].l<ep){ep=cs[i].l;af=Math.min(.2,af+.02)}}}
+  let hc=(cs[n-30].o+cs[n-30].h+cs[n-30].l+cs[n-30].c)/4,ho=(cs[n-30].o+cs[n-30].c)/2,ha=0;
+  for(let i=n-29;i<n;i++){const x=cs[i],c2=(x.o+x.h+x.l+x.c)/4,o2=(ho+hc)/2;ho=o2;hc=c2;if(i>=n-3)ha+=c2>o2?1:-1}
+  const ry=c.slice(-20),my=mean(ry),rl=ry.reduce((q,v,i)=>q+(i-9.5)*(v-my),0)/ry.reduce((q,_,i)=>q+(i-9.5)**2,0);
+  const cx=cs[n-1],cy=cs[n-2],bd=Math.abs(cx.c-cx.o),rg=cx.h-cx.l||1e-9,lw=Math.min(cx.o,cx.c)-cx.l,uw=cx.h-Math.max(cx.o,cx.c);
+  let cp=0;
+  if(cx.c>cx.o&&cy.c<cy.o&&cx.c>cy.o&&cx.o<cy.c)cp=1;
+  else if(cx.c<cx.o&&cy.c>cy.o&&cx.c<cy.o&&cx.o>cy.c)cp=-1;
+  else if(lw>bd*2&&lw>rg*.55)cp=.7;
+  else if(uw>bd*2&&uw>rg*.55)cp=-.7;
   const parts=[
+    {n:"CCI",w:.7,v:cci<-100?.8:cci>100?-.8:clip(cci/250)},
+    {n:"DMI/ADX",w:1,v:clip((pdi-mdi)/((pdi+mdi)||1)*2)*clip(dx/25)},
+    {n:"一目均衡表",w:1,v:clip((tk>kj?.5:-.5)+(p>Math.max(sa,sb)?.5:p<Math.min(sa,sb)?-.5:0))},
+    {n:"パラボリック",w:.8,v:su?1:-1},
+    {n:"平均足",w:.7,v:ha/3},
+    {n:"回帰傾き",w:.8,v:clip(rl*10/atr)},
+    {n:"ローソク足",w:.5,v:cp},
     {n:"トレンド",w:1.2,v:(Math.sign(e9[n-1]-e21[n-1])+Math.sign(e21[n-1]-e50[n-1]))/2},
-    {n:"MACD",w:1,v:(Math.sign(h1)+Math.sign(h1-h0))/2},
+    {n:"MACD",w:1,v:clip(h1/(atr*.2))*.5+Math.sign(h1-h0)*.5},{n:"MACD先行",w:1.2,v:h1<0&&h1>h0?clip(1-Math.abs(h1)/(Math.abs(h1-h0)*4)):h1>0&&h1<h0?-clip(1-h1/((h0-h1)*4)):0},
     {n:"RSI",w:.8,v:r<30?1:r>70?-1:clip((r-50)/-50*-1.2)},
     {n:"ボリバン",w:1,v:b<.05?1:b>.95?-1:clip((.5-b)*.8)},
     {n:"ストキャス",w:.8,v:k<20&&k>d?1:k>80&&k<d?-1:0},
@@ -162,19 +199,19 @@ function analyze(cs){
   ];
   const sw=parts.reduce((s,x)=>s+x.w,0),score=parts.reduce((s,x)=>s+x.w*x.v,0)/sw;
   const agree=parts.filter(x=>Math.abs(x.v)>.3&&Math.sign(x.v)===Math.sign(score)).length;
-  return{score,parts,agree,price:p,volOk:atr/base>=.6,e9,e21,atr};
+  return{score,parts,agree,price:p,volOk:atr/base>=.6,e9,e21,atr,h0,h1};
 }
 
-function beep(dir){
+function beep(dir,soft){
   if(!S.sound)return;
   try{
     S.ac=S.ac||new(window.AudioContext||window.webkitAudioContext)();
     if(S.ac.state==="suspended")S.ac.resume();
-    const f=dir>0?[660,880,1175]:[880,660,440];
+    const f=soft?(dir>0?[784,988]:[988,784]):(dir>0?[660,880,1175]:[880,660,440]);
     f.forEach((hz,i)=>{
       const o=S.ac.createOscillator(),g=S.ac.createGain(),t=S.ac.currentTime+i*.17;
       o.type="triangle";o.frequency.value=hz;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(soft?.16:.35,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.3);
       o.connect(g).connect(S.ac.destination);o.start(t);o.stop(t+.32);
     });
   }catch(e){}
@@ -191,18 +228,18 @@ function settle(){
   });
   const lim=+$("#ml").value||3;
   let streak=0;
-  for(const x of S.hist){if(x.res==="L")streak++;else if(x.res==="W")break;}
+  for(const x of S.hist.filter(h=>h.kind!=="pre")){if(x.res==="L")streak++;else if(x.res==="W")break;}
   if(streak>=lim)S.locked=true;
   save();
 }
 
 function onClose(){
-  S.a=analyze(S.cs);
+  S.a=analyze(S.cs);calAdd();
   settle();
   const a=S.a;
   if(a&&!S.locked&&!S.pend.length&&S.run){
     const th=+$("#th").value/100;
-    if(a.volOk&&Math.abs(a.score)>=th&&a.agree>=4){
+    if(a.volOk&&Math.abs(a.score)>=th&&a.agree>=Math.ceil(a.parts.length*.4)){
       const last=S.cs[S.cs.length-1],dir=Math.sign(a.score);
       const q={t:last.t+60000,sym:$("#sym").value,dir,entry:last.c,exp:last.t+60000+HOLD,score:a.score,res:null};
       S.pend.push(q);S.hist.unshift(q);save();
@@ -215,7 +252,7 @@ function onClose(){
 }
 
 function render(){
-  const a=S.a,live=S.live||S.cs[S.cs.length-1];
+  const a=S.lv||S.a,live=S.live||S.cs[S.cs.length-1];
   $("#px").textContent=live?fmt(live.c):"-";
   const act=S.hist.find(x=>x.res===null&&S.pend.includes(x));
   const orb=$("#orb");
@@ -225,8 +262,8 @@ function render(){
     $("#sub").textContent="判定まで";
     $("#en").textContent=fmt(act.entry);
   }else{
-    $("#dir").textContent=S.locked?"STOP":"WAIT";
-    $("#sub").textContent=S.locked?"連敗上限で停止中":S.run?(a?"条件が揃うのを待っています":"データ蓄積中…"):"開始を押してください";
+    const pa=S.lv&&S.run&&!S.locked&&S.lv.volOk&&Math.abs(S.lv.score)>=+$("#th").value/100*.8&&S.lv.agree>=Math.ceil(S.lv.parts.length*.3);$("#dir").textContent=S.locked?"STOP":pa?(a.score>0?"予兆 ▲":"予兆 ▼"):"WAIT";
+    $("#sub").textContent=S.locked?"連敗上限で停止中":S.run?(a?(pa?"確定前の早期サイン(裁量で判断)":"条件が揃うのを待っています"):"データ蓄積中…"):"開始を押してください";
     $("#cd").textContent="--:--";orb.style.setProperty("--p",0);
     $("#en").textContent="-";
   }
@@ -236,11 +273,11 @@ function render(){
     const w=Math.abs(x.v)*50,l=x.v>=0?50:50-w;
     return`<div class="ib"><span>${x.n}</span><div class="bar"><i style="left:${l}%;width:${w}%;background:${x.v>=0?"var(--up)":"var(--dn)"}"></i></div><b style="text-align:right">${x.v>=0?"+":""}${x.v.toFixed(2)}</b></div>`;
   }).join(""):'<span style="color:var(--mu)">データ待ちです</span>';
-  const dn=S.hist.filter(x=>x.res);const W=dn.filter(x=>x.res==="W").length,L=dn.filter(x=>x.res==="L").length;
-  $("#sw").textContent=W;$("#sl").textContent=L;
+  const dn=S.hist.filter(x=>x.res&&x.kind!=="pre");const W=dn.filter(x=>x.res==="W").length,L=dn.filter(x=>x.res==="L").length;
+  $("#sw").textContent=W;$("#sl").textContent=L;const pd=S.hist.filter(x=>x.kind==="pre"&&x.res&&x.res!=="D"),pw=pd.filter(x=>x.res==="W").length;$("#pr").textContent=pd.length?pw+"勝 "+(pd.length-pw)+"敗 ("+(pw/pd.length*100).toFixed(1)+"%)":"-";
   $("#sr").textContent=W+L?(W/(W+L)*100).toFixed(1)+"%":"-";
   const po=+$("#po").value;$("#sb").textContent=po>1?(100/po).toFixed(1)+"%":"-";
-  $("#hb").innerHTML=S.hist.slice(0,50).map(x=>`<tr><td>${tstr(x.t)}</td><td>${x.sym}</td><td class="${x.dir>0?"w":"l"}">${x.dir>0?"HIGH":"LOW"}</td><td>${fmt(x.entry)}</td><td>${fmt(x.out)}</td><td class="${x.res==="W"?"w":x.res==="L"?"l":"d"}">${x.res==="W"?"勝ち":x.res==="L"?"負け":x.res==="D"?"引分":"判定中"}</td></tr>`).join("");
+  $("#hb").innerHTML=S.hist.slice(0,50).map(x=>`<tr><td>${tstr(x.t)}</td><td>${x.sym}</td><td class="${x.dir>0?"w":"l"}">${x.dir>0?"HIGH":"LOW"}${x.kind==="pre"?" 予兆":""}</td><td>${fmt(x.entry)}</td><td>${fmt(x.out)}</td><td class="${x.res==="W"?"w":x.res==="L"?"l":"d"}">${x.res==="W"?"勝ち":x.res==="L"?"負け":x.res==="D"?"引分":"判定中"}</td></tr>`).join("");
   draw();
 }
 
@@ -279,6 +316,8 @@ function draw(){
 
 function tick(){
   const now=Date.now(),nx=60-(now%60000)/1000;
+  const pr=S.live||S.cs[S.cs.length-1];
+  if(S.pp.length&&pr&&S.pp.some(q=>now>=q.exp)){S.pp=S.pp.filter(q=>{if(now<q.exp)return true;const df=(pr.c-q.entry)*q.dir;q.res=df>0?"W":df<0?"L":"D";q.out=pr.c;return false});save();render()}
   $("#nx").textContent=S.run?nx.toFixed(0)+" 秒":"-";
   const q=S.pend[0];
   if(q){
@@ -287,6 +326,59 @@ function tick(){
     $("#cd").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
     $("#orb").style.setProperty("--p",(rem/HOLD*100).toFixed(1));
   }
+}
+
+function scoreAt(k){const a=analyze(S.cs.slice(0,k));return a?a.score:null}
+function buildCal(){
+  S.cal=[];
+  for(let k=80;k+5<=S.cs.length;k++){
+    const sc=scoreAt(k);if(sc==null)continue;
+    const d=S.cs[k+4].c-S.cs[k-1].c;if(d!==0)S.cal.push({s:sc,u:d>0?1:0});
+  }
+  S.calT=S.cs.length?S.cs[S.cs.length-1].t:0;
+}
+function calAdd(){
+  const n=S.cs.length;if(n<86)return;
+  const t=S.cs[n-1].t;if(S.calT===t)return;S.calT=t;
+  const sc=scoreAt(n-5);if(sc==null)return;
+  const d=S.cs[n-1].c-S.cs[n-6].c;
+  if(d!==0)S.cal.push({s:sc,u:d>0?1:0});
+  S.cal=S.cal.slice(-2000);
+}
+function prob(score){
+  const near=S.cal.filter(x=>Math.abs(x.s-score)<=.12),n=near.length,u=near.reduce((q,x)=>q+x.u,0);
+  return{p:(u+(.5+.08*score)*25)/(n+25),n};
+}
+
+function liveTick(){
+  if(!S.live||S.cs.length<80)return;
+  const n=Date.now();if(n-S.lt<400)return;S.lt=n;
+  S.lv=analyze(S.cs.concat([S.live]));
+  preCheck();meter();render();
+}
+
+function preCheck(){
+  const a=S.lv;if(!a||!S.run||S.locked||S.pp.length||S.preT===S.live.t)return;
+  if(!a.volOk||Math.abs(a.score)<+$("#th").value/100*.8||a.agree<Math.ceil(a.parts.length*.3))return;
+  const q={t:Date.now(),sym:$("#sym").value,dir:Math.sign(a.score),entry:S.live.c,exp:Date.now()+HOLD,score:a.score,res:null,kind:"pre"};
+  S.preT=S.live.t;S.pp.push(q);S.hist.unshift(q);save();
+  beep(q.dir,true);
+  if(navigator.vibrate)navigator.vibrate(60);
+}
+
+function meter(){
+  const a=S.lv;if(!a)return;
+  const pr=prob(a.score),ph=Math.round(pr.p*100);$("#ph").textContent="HIGH "+ph+"%";$("#pl").textContent="LOW "+(100-ph)+"%";$("#pbar").style.width=ph+"%";$("#pn").textContent="直近"+pr.n+"件の実績で校正";
+  $("#lv").textContent=Math.round(Math.abs(a.score)*100)+" ("+(a.score>0?"買い":a.score<0?"売り":"中立")+") 一致"+a.agree+"/"+a.parts.length;
+  const d=a.h1-a.h0;
+  $("#mx").textContent=a.h1<0&&d>0?"上抜けまで約"+Math.max(1,Math.round(-a.h1/d))+"本":a.h1>0&&d<0?"下抜けまで約"+Math.max(1,Math.round(a.h1/-d))+"本":a.h1>0?"買い優勢が拡大中":"売り優勢が拡大中";
+}
+
+const PRE=[{f:12,s:26,g:9,r:14,k:14},{f:8,s:17,g:6,r:10,k:10},{f:5,s:13,g:4,r:7,k:7}];
+function setP(){
+  S.P=PRE[+$("#pst").value];
+  S.a=analyze(S.cs);buildCal();S.lt=0;
+  if(S.live)liveTick();else render();
 }
 
 function stop(){
@@ -299,14 +391,14 @@ async function startBn(sym){
   const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=1m&limit=300`);
   const j=await r.json();
   const l=j.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4]}));
-  S.live=l.pop();S.cs=l;S.a=analyze(S.cs);render();
+  S.live=l.pop();S.cs=l;S.a=analyze(S.cs);buildCal();render();
   const open=()=>{
     const ws=new WebSocket(`wss://stream.binance.com:9443/ws/${sym.toLowerCase()}@kline_1m`);
     ws.onmessage=e=>{
       const k=JSON.parse(e.data).k,c={t:k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c};
       if(k.x){
         if(!S.cs.length||S.cs[S.cs.length-1].t<c.t){S.cs.push(c);S.cs=S.cs.slice(-400);S.live=null;onClose()}
-      }else{S.live=c;$("#px").textContent=fmt(c.c);draw()}
+      }else{S.live=c;$("#px").textContent=fmt(c.c);liveTick()}
     };
     ws.onclose=()=>{if(S.run)setTimeout(open,2000)};
     S.ws=ws;
@@ -325,14 +417,16 @@ async function pollTd(sym,key){
       S.live=live;
       const fresh=l.length&&l[l.length-1].t>prev;
       S.cs=l;
+      if(!prev)buildCal();
       if(fresh)onClose();else{S.a=S.a||analyze(S.cs);render()}
+      S.lt=0;liveTick();
     }catch(e){$("#sub").textContent="通信に失敗しました"}
   };
   await go();S.tm=setInterval(go,10000);
 }
 
 async function start(){
-  stop();S.cs=[];S.live=null;S.pend=[];S.a=null;S.locked=false;
+  stop();S.cs=[];S.live=null;S.pend=[];S.a=null;S.locked=false;S.pp=[];S.lv=null;
   S.hist.forEach(x=>{if(x.res===null)x.res="D"});
   S.run=true;$("#go").textContent="停止";
   try{
@@ -363,6 +457,7 @@ $("#clr").onclick=()=>{S.hist=[];S.pend=[];save();render()};
 $("#th").oninput=()=>{$("#thv").textContent=($("#th").value/100).toFixed(2)};
 $("#po").oninput=render;
 window.addEventListener("resize",draw);
+$("#pst").onchange=setP;
 fillSym();render();setInterval(tick,500);
 </script>
 </body>
